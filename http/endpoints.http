@@ -1,1 +1,11 @@
 http://localhost:8080/tarefas
+
+###
+POST http://localhost:8080/tarefas
+Content-Type: application/json
+
+{
+  "titulo": "Tarefa 3",
+  "descricao": "tarefa vitinho",
+  "prazo": "2026-09-17"
+}
