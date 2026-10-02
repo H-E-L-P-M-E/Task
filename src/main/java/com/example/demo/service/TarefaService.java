@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.TaskRequestDTO;
 import com.example.demo.dto.TaskResponseDTO;
+import com.example.demo.model.Prioridade;
 import com.example.demo.model.Tarefa;
 import com.example.demo.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,15 @@ public class TarefaService {
 
     public TaskResponseDTO criar(TaskRequestDTO dto) {
         String titulo=dto.titulo();
-        Tarefa tarefa = new Tarefa(sequencia.incrementAndGet(),dto.titulo(),dto.descricao(),null);
+
+        Tarefa tarefa = new Tarefa(null,dto.titulo(),false, Prioridade.BAIXA);
         System.out.println("[SERVICE] Validando regra de negócio para: " +
                 titulo);
         if (titulo == null || titulo.isBlank()) {
             throw new IllegalArgumentException("O título da tarefa não pode ser vazio.");
         }
-        Tarefa salva= repository.salvar(tarefa);
+        System.out.println("tarefa: "+tarefa.toString());
+        Tarefa salva= repository.save(tarefa);
         return toResponseDTO(salva);
     }
 
@@ -36,17 +39,17 @@ public class TarefaService {
                 tarefa.getId(),
                 tarefa.getTitulo(),
                 tarefa.isConcluida(),
-                tarefa.getPrioridade()
+                tarefa.getPrioridade().toString()
         );
     }
 
     public List<Tarefa> listar() {
         System.out.println("[SERVICE] Solicitando lista de tarefas ao repository");
-        return repository.listarTodas();
+        return repository.findAll();
     }
     public Tarefa buscarPorId(Long id) {
         System.out.println("[SERVICE] Processando busca por id: " + id);
-        return repository.buscarPorId(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Tarefa não encontrada: " + id));
     }
 
@@ -62,5 +65,17 @@ public class TarefaService {
         }
         return tarefasConcluidas;
 
+    }
+
+    public TaskResponseDTO atualizar(Long id, TaskRequestDTO dto) {
+        String titulo=dto.titulo();
+        Tarefa tarefa = new Tarefa(id,dto.titulo(),dto.concluida(), dto.prioridade());
+        System.out.println("[SERVICE] Validando regra de negócio para: " +
+                titulo);
+        if (titulo == null || titulo.isBlank()) {
+            throw new IllegalArgumentException("O título da tarefa não pode ser vazio.");
+        }
+        Tarefa atualizada= repository.save(tarefa);
+        return toResponseDTO(atualizada);
     }
 }
